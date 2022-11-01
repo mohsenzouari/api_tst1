@@ -28,7 +28,7 @@ class ApiTst extends StatefulWidget {
 class _ApiTstState extends State<ApiTst> {
   List posts = [];
 
-  Future getPost() async {
+  Future getPosts() async {
     var url = "https://jsonplaceholder.typicode.com/posts";
     var response = await http.get(Uri.parse(url));
     var responsebody = jsonDecode(response.body);
@@ -37,6 +37,24 @@ class _ApiTstState extends State<ApiTst> {
     //   posts.addAll(responsebody);
     // });
     // print(responsebody[1]);
+  }
+
+  addPosts() async {
+    var url = "https://jsonplaceholder.typicode.com/posts";
+    var response = await http.post(
+      Uri.parse(url),
+      body: {
+        "title": 'foo',
+        "body": 'bar',
+        "userId": "1",
+      },
+      // headers: {
+      //   'Content-type': 'application/json; charset=UTF-8',
+      // },
+    );
+    var responsebody = jsonDecode(response.body);
+    print(responsebody);
+    return responsebody;
   }
 
   // @override
@@ -53,22 +71,33 @@ class _ApiTstState extends State<ApiTst> {
         ), // AppBar
         body: Padding(
             padding: const EdgeInsets.all(27.0),
-            child: FutureBuilder(
-              future: getPost(),
-              builder: ((context, snapshot) {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          color: Colors.white,
-                          margin: EdgeInsets.only(top: 10, bottom: 10),
-                          child: Text("${snapshot.data[index]['id']}"),
-                        );
-                      });
-                }
-                return CircularProgressIndicator();
-              }),
+            child: ListView(
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      addPosts();
+                    },
+                    child: Text("Add Posts")),
+                FutureBuilder(
+                  future: getPosts(),
+                  builder: ((context, snapshot) {
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              color: Colors.white,
+                              margin: EdgeInsets.only(top: 10, bottom: 10),
+                              child: Text("${snapshot.data[index]['id']}"),
+                            );
+                          });
+                    }
+                    return CircularProgressIndicator();
+                  }),
+                )
+              ],
             )));
   }
 }
